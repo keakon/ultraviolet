@@ -73,7 +73,7 @@ func (s *TerminalRenderer) scrolln(newbuf *RenderBuffer, n, top, bot, maxY int) 
 	if n > 0 { //nolint:nestif
 		// Scroll up (forward)
 		v = s.scrollUp(newbuf, n, top, bot, 0, maxY, blank)
-		if !v {
+		if !v && !s.flags.Contains(tNoScrollRegionOptim) {
 			s.buf.WriteString(ansi.SetTopBottomMargins(top+1, bot+1))
 
 			// XXX: How should we handle this in inline mode when not using alternate screen?
@@ -89,7 +89,7 @@ func (s *TerminalRenderer) scrolln(newbuf *RenderBuffer, n, top, bot, maxY int) 
 	} else if n < 0 {
 		// Scroll down (backward)
 		v = s.scrollDown(newbuf, -n, top, bot, 0, maxY, blank)
-		if !v {
+		if !v && !s.flags.Contains(tNoScrollRegionOptim) {
 			s.buf.WriteString(ansi.SetTopBottomMargins(top+1, bot+1))
 
 			// XXX: How should we handle this in inline mode when not using alternate screen?
