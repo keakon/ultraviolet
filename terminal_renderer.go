@@ -93,6 +93,7 @@ const (
 	// tGraphemeWidth indicates the terminal measures cell width using Unicode
 	// grapheme clustering (DEC mode 2027 / Unicode core).
 	tGraphemeWidth
+	tNoScrollRegionOptim
 )
 
 // Set sets the given flags.
@@ -197,6 +198,18 @@ func (s *TerminalRenderer) SetScrollOptim(v bool) {
 		s.flags.Set(tScrollOptim)
 	} else {
 		s.flags.Reset(tScrollOptim)
+	}
+}
+
+// SetScrollRegionOptim sets whether hard scroll optimizations may use
+// DECSTBM top/bottom margins to scroll a bounded region. Disabling this keeps
+// other scroll optimizations enabled while avoiding terminals that mishandle
+// scroll-region state.
+func (s *TerminalRenderer) SetScrollRegionOptim(v bool) {
+	if v {
+		s.flags.Reset(tNoScrollRegionOptim)
+	} else {
+		s.flags.Set(tNoScrollRegionOptim)
 	}
 }
 
