@@ -17,13 +17,13 @@ import (
 
 	_ "image/jpeg" // Register JPEG format
 
-	uv "github.com/charmbracelet/ultraviolet"
-	"github.com/charmbracelet/ultraviolet/screen"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/charmbracelet/x/ansi/iterm2"
 	"github.com/charmbracelet/x/ansi/kitty"
 	"github.com/charmbracelet/x/ansi/sixel"
 	"github.com/charmbracelet/x/mosaic"
+	uv "github.com/keakon/ultraviolet"
+	"github.com/keakon/ultraviolet/screen"
 )
 
 type imageEncoding uint8

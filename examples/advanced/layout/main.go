@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"charm.land/lipgloss/v2"
-	uv "github.com/charmbracelet/ultraviolet"
-	"github.com/charmbracelet/ultraviolet/screen"
 	"github.com/charmbracelet/x/ansi"
+	uv "github.com/keakon/ultraviolet"
+	"github.com/keakon/ultraviolet/screen"
 	"github.com/lucasb-eyer/go-colorful"
 	"github.com/rivo/uniseg"
 )

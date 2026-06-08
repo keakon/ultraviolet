@@ -13,10 +13,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	uv "github.com/charmbracelet/ultraviolet"
-	"github.com/charmbracelet/ultraviolet/screen"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/charmbracelet/x/ansi/iterm2"
+	uv "github.com/keakon/ultraviolet"
+	"github.com/keakon/ultraviolet/screen"
 )
 
 func main() {

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	uv "github.com/charmbracelet/ultraviolet"
-	"github.com/charmbracelet/ultraviolet/screen"
+	uv "github.com/keakon/ultraviolet"
+	"github.com/keakon/ultraviolet/screen"
 )
 
 func BenchmarkLayout_Split(b *testing.B) {

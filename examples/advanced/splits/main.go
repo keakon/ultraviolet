@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	uv "github.com/charmbracelet/ultraviolet"
-	"github.com/charmbracelet/ultraviolet/layout"
-	"github.com/charmbracelet/ultraviolet/screen"
 	"github.com/charmbracelet/x/ansi"
+	uv "github.com/keakon/ultraviolet"
+	"github.com/keakon/ultraviolet/layout"
+	"github.com/keakon/ultraviolet/screen"
 )
 
 func main() {
