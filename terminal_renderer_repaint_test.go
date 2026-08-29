@@ -160,3 +160,50 @@ func TestRepaintLineNotTriggeredWithoutWideCells(t *testing.T) {
 		t.Fatalf("content missing: %q", out)
 	}
 }
+
+// Inline layout: the card surface ends before the terminal width, leaving a
+// margin of unstyled blanks. The erase must use the surface's background (so
+// the surface tail is correct without per-cell writes), and the margin must be
+// restored afterwards from an exactly anchored position, without carrying the
+// surface background past the surface edge.
+func TestRepaintLineWidthCellWithOuterMargin(t *testing.T) {
+	r, buf := newRepaintRenderer(t)
+	r.EnterAltScreen()
+	cellbuf := NewRenderBuffer(12, 1)
+	fillRepaintRow(cellbuf, 0, true,
+		Cell{Content: "a", Width: 1},
+		Cell{Content: "1️⃣", Width: 2},
+		Cell{Content: "b", Width: 1},
+	)
+	// Shrink the surface to columns 0..8: overwrite columns 9..11 with
+	// unstyled blanks (the outer margin).
+	for x := 9; x < 12; x++ {
+		empty := EmptyCell
+		cellbuf.SetCell(x, 0, &empty)
+	}
+	cellbuf.TouchLine(0, 0, 12)
+	r.Render(cellbuf)
+	r.Flush()
+
+	out := buf.String()
+	// The surface is erased with its own background.
+	if !strings.Contains(out, "\x1b[48;2;78;78;78m"+ansi.EraseLineRight) {
+		t.Fatalf("expected surface-background erase, got %q", out)
+	}
+	if !strings.Contains(out, "a1️⃣b") {
+		t.Fatalf("content missing: %q", out)
+	}
+	// The margin is restored by a second erase from the exact surface end.
+	marginAnchor := "\r" + ansi.CursorForward(9)
+	i := strings.Index(out, marginAnchor)
+	if i < 0 {
+		t.Fatalf("expected margin restore anchored at the surface end, got %q", out)
+	}
+	tail := out[i:]
+	if !strings.Contains(tail, ansi.EraseLineRight) {
+		t.Fatalf("expected margin erase after the anchor, got %q", tail)
+	}
+	if strings.Contains(tail, "\x1b[48;") {
+		t.Fatalf("margin erase must not carry the surface background: %q", tail)
+	}
+}

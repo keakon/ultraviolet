@@ -811,14 +811,22 @@ func lineHasWide(line Line) bool {
 // repaintLine repaints a line from scratch. Unlike
 // [TerminalRenderer.transformLine] it does not diff against the previous
 // frame: it moves to the true column 0 (carriage return reaches column 0
-// regardless of any accumulated drift), erases the whole line so the tail is
-// filled through the physical end of line, and rewrites the content cells
-// from that known-empty state. Erasing with the line's own trailing blank
-// style keeps card-like surfaces intact: the erased tail carries the same
-// background the erased cells had.
+// regardless of any accumulated drift), erases the line with the style of the
+// row's own surface, rewrites the content cells from that known state, and
+// finally restores the outer margin with a second erase from an absolutely
+// anchored position.
+//
+// The surface is the row minus its trailing run of plain unstyled blanks (the
+// margin a TUI leaves outside a card). Erasing with the surface's trailing
+// blank style keeps card-like rows intact: the erased tail — including the
+// columns a drifted terminal never reaches — carries the same background the
+// erased cells had. The margin is then erased from its exact start (relative
+// to the re-anchored column 0 the position is exact), so no surface background
+// bleeds past the surface's right edge.
 func (s *TerminalRenderer) repaintLine(newbuf *RenderBuffer, y int) {
 	oldLine := s.curbuf.Line(y)
 	newLine := newbuf.Line(y)
+	width := newbuf.Width()
 
 	// Carriage return is the only horizontal move whose destination the model
 	// knows exactly; relative moves and overwrites would inherit any drift.
@@ -827,10 +835,21 @@ func (s *TerminalRenderer) repaintLine(newbuf *RenderBuffer, y int) {
 	s.atPhantom = false
 	s.move(newbuf, 0, y)
 
-	// Erase with the line's trailing cell when it is a plain blank, so the
+	// Find the surface end: the row minus its trailing margin of unstyled
+	// blanks. Zero cells (wide-cell placeholders) count as margin too.
+	surfaceEnd := width
+	for surfaceEnd > 0 {
+		c := newLine.At(surfaceEnd - 1)
+		if c == nil || c.IsZero() || !cellEqual(c, &EmptyCell) {
+			break
+		}
+		surfaceEnd--
+	}
+
+	// Erase with the surface's trailing cell when it is a plain blank, so the
 	// erased tail keeps the surface's background color (BCE); otherwise fall
-	// back to the current pen.
-	pen := newLine.At(newbuf.Width() - 1)
+	// back to the default background.
+	pen := newLine.At(surfaceEnd - 1)
 	if pen == nil || !canClearWith(pen) {
 		empty := EmptyCell
 		pen = &empty
@@ -838,19 +857,31 @@ func (s *TerminalRenderer) repaintLine(newbuf *RenderBuffer, y int) {
 	s.updatePen(pen)
 	_, _ = s.buf.WriteString(ansi.EraseLineRight)
 
-	// Write the content cells. The line was just erased, so trailing cells
-	// equal to the pen need no write, and writing them would risk wrapping
-	// past the right margin if the terminal painted a wide cell wider than
-	// the model measured.
-	blank := s.clearBlank()
-	last := -1
-	for x := 0; x < newbuf.Width(); x++ {
-		if c := newLine.At(x); c != nil && !c.IsZero() && !cellEqual(c, blank) {
-			last = x
+	// Write the content cells. The line was just erased, so cells equal to the
+	// pen need no write, and writing them would paint the tail with per-cell
+	// writes that a drifted terminal never lands on the final columns. The
+	// writes may drift within the surface; the erased tail behind them is
+	// already correct.
+	for x := 0; x < surfaceEnd; x++ {
+		c := newLine.At(x)
+		if c == nil || c.IsZero() || cellEqual(c, pen) {
+			continue
 		}
+		s.putCell(newbuf, c)
 	}
-	for x := 0; x <= last; x++ {
-		s.putCell(newbuf, newLine.At(x))
+
+	// Restore the margin outside the surface with the default background,
+	// starting from its exact column: relative to the re-anchored column 0 a
+	// cursor-forward lands precisely regardless of any drift from the content
+	// writes above.
+	if surfaceEnd < width {
+		_ = s.buf.WriteByte('\r')
+		s.cur.X = 0
+		s.atPhantom = false
+		_, _ = s.buf.WriteString(ansi.CursorForward(surfaceEnd))
+		s.updatePen(nil)
+		_, _ = s.buf.WriteString(ansi.EraseLineRight)
+		s.cur.X = surfaceEnd
 	}
 
 	// Adopt the new line as the model of what is on screen.
