@@ -3,6 +3,7 @@ package uv
 import (
 	"bytes"
 	"image/color"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -205,5 +206,147 @@ func TestRepaintLineWidthCellWithOuterMargin(t *testing.T) {
 	}
 	if strings.Contains(tail, "\x1b[48;") {
 		t.Fatalf("margin erase must not carry the surface background: %q", tail)
+	}
+}
+
+// csiSequence matches ANSI CSI sequences, used to inspect the visible text of
+// a rendered output.
+var csiSequence = regexp.MustCompile(`\x1b\[[0-9;?]*[ -/]*[@-~]`)
+
+func stripANSI(s string) string {
+	return csiSequence.ReplaceAllString(s, "")
+}
+
+// Cells inside the surface that already match the erased pen (blank padding
+// between two text segments on a card row) must still be written: the cursor
+// only advances by writing, and skipping one would shift every later write on
+// the row one column left.
+func TestRepaintLineInteriorBlankKeepsPositioning(t *testing.T) {
+	r, buf := newRepaintRenderer(t)
+	r.EnterAltScreen()
+	cellbuf := NewRenderBuffer(12, 1)
+	fillRepaintRow(cellbuf, 0, true,
+		Cell{Content: "1️⃣", Width: 2},
+		Cell{Content: "a", Width: 1},
+		Cell{Content: " ", Width: 1, Style: Style{Bg: repaintCardBg}},
+		Cell{Content: "b", Width: 1},
+	)
+	r.Render(cellbuf)
+	r.Flush()
+
+	out := stripANSI(buf.String())
+	if !strings.Contains(out, "1️⃣a b") {
+		t.Fatalf("interior blank must be written between content cells, got %q", out)
+	}
+}
+
+// A wide cell at the very start of a full-width row: the repaint writes the
+// row from column 0 and the wide glyph is the first written cell.
+func TestRepaintLineWideCellAtLineStart(t *testing.T) {
+	r, buf := newRepaintRenderer(t)
+	r.EnterAltScreen()
+	cellbuf := NewRenderBuffer(6, 1)
+	fillRepaintRow(cellbuf, 0, false,
+		Cell{Content: "1️⃣", Width: 2},
+		Cell{Content: "a", Width: 1},
+		Cell{Content: "b", Width: 1},
+		Cell{Content: "c", Width: 1},
+		Cell{Content: "d", Width: 1},
+	)
+	r.Render(cellbuf)
+	r.Flush()
+
+	out := buf.String()
+	if !strings.Contains(out, ansi.EraseLineRight) {
+		t.Fatalf("expected erase-to-end-of-line repaint, got %q", out)
+	}
+	if !strings.Contains(stripANSI(out), "1️⃣abcd") {
+		t.Fatalf("content missing: %q", out)
+	}
+}
+
+// A wide row followed by a changed plain row: the move to the next row must
+// be anchored (carriage return) so the drifted cursor left by the repaint
+// cannot corrupt the next row's position.
+func TestRepaintLineCrossRowMove(t *testing.T) {
+	r, buf := newRepaintRenderer(t)
+	r.EnterAltScreen()
+	cellbuf := NewRenderBuffer(10, 2)
+	fillRepaintRow(cellbuf, 0, true,
+		Cell{Content: "1️⃣", Width: 2},
+		Cell{Content: "a", Width: 1},
+	)
+	fillRepaintRow(cellbuf, 1, true,
+		Cell{Content: "b", Width: 1},
+		Cell{Content: "c", Width: 1},
+	)
+	r.Render(cellbuf)
+	r.Flush()
+
+	out := buf.String()
+	if !strings.Contains(out, "\r\nbc") {
+		t.Fatalf("expected CR-anchored move to the next row, got %q", out)
+	}
+}
+
+// Repainting is deterministic: when a wide row is touched but both frames
+// agree, the row already shows the repainted pixels and the frame needs no
+// output at all.
+func TestRepaintLineSkipWhenFramesAgree(t *testing.T) {
+	r, buf := newRepaintRenderer(t)
+	r.EnterAltScreen()
+	cellbuf := NewRenderBuffer(10, 1)
+	fillRepaintRow(cellbuf, 0, true,
+		Cell{Content: "1️⃣", Width: 2},
+		Cell{Content: "a", Width: 1},
+		Cell{Content: "b", Width: 1},
+	)
+	r.Render(cellbuf)
+	r.Flush()
+
+	buf.Reset()
+	cellbuf2 := NewRenderBuffer(10, 1)
+	fillRepaintRow(cellbuf2, 0, true,
+		Cell{Content: "1️⃣", Width: 2},
+		Cell{Content: "a", Width: 1},
+		Cell{Content: "b", Width: 1},
+	)
+	r.Render(cellbuf2)
+	r.Flush()
+
+	if out := buf.String(); out != "" {
+		t.Fatalf("identical wide row should be skipped, got %q", out)
+	}
+}
+
+// After a width-changing resize the model must adopt the repainted row so a
+// later identical frame is skipped: the resize frame repaints with the new
+// width and the renderer's resize block syncs the model afterwards, so the
+// next identical frame needs no output at all.
+func TestRepaintLineResizeSyncsModel(t *testing.T) {
+	r, buf := newRepaintRenderer(t)
+	r.EnterAltScreen()
+
+	render := func(width int, content string) string {
+		buf.Reset()
+		cellbuf := NewRenderBuffer(width, 1)
+		fillRepaintRow(cellbuf, 0, true,
+			Cell{Content: "1️⃣", Width: 2},
+			Cell{Content: content, Width: 1},
+		)
+		r.Render(cellbuf)
+		r.Flush()
+		return buf.String()
+	}
+
+	render(10, "a")
+	// Resize wider with different content: repaint with the new width.
+	out2 := render(12, "b")
+	if !strings.Contains(out2, ansi.EraseLineRight) || !strings.Contains(out2, "b") {
+		t.Fatalf("expected repaint on resize, got %q", out2)
+	}
+	// The model matches the new buffer now: identical frames are skipped.
+	if out3 := render(12, "b"); out3 != "" {
+		t.Fatalf("expected skip after resize, got %q", out3)
 	}
 }

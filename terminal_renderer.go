@@ -808,6 +808,19 @@ func lineHasWide(line Line) bool {
 	return false
 }
 
+// linesEqual reports whether the two lines are cell-for-cell identical.
+func linesEqual(a, b Line) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if !cellEqual(a.At(i), b.At(i)) {
+			return false
+		}
+	}
+	return true
+}
+
 // repaintLine repaints a line from scratch. Unlike
 // [TerminalRenderer.transformLine] it does not diff against the previous
 // frame: it moves to the true column 0 (carriage return reaches column 0
@@ -857,17 +870,22 @@ func (s *TerminalRenderer) repaintLine(newbuf *RenderBuffer, y int) {
 	s.updatePen(pen)
 	_, _ = s.buf.WriteString(ansi.EraseLineRight)
 
-	// Write the content cells. The line was just erased, so cells equal to the
-	// pen need no write, and writing them would paint the tail with per-cell
-	// writes that a drifted terminal never lands on the final columns. The
-	// writes may drift within the surface; the erased tail behind them is
-	// already correct.
+	// Write the content cells up to the last one that differs from the erased
+	// pen. The erase already painted the whole row, so trailing pen-equal
+	// cells need no write — writing them would paint the tail with per-cell
+	// writes that a drifted terminal never lands on the final columns. Every
+	// earlier cell must be written, pen-equal ones included: the cursor only
+	// advances by writing, and skipping one would shift every later write on
+	// the row one column left.
+	blank := s.clearBlank()
+	last := -1
 	for x := 0; x < surfaceEnd; x++ {
-		c := newLine.At(x)
-		if c == nil || c.IsZero() || cellEqual(c, pen) {
-			continue
+		if c := newLine.At(x); c != nil && !c.IsZero() && !cellEqual(c, blank) {
+			last = x
 		}
-		s.putCell(newbuf, c)
+	}
+	for x := 0; x <= last; x++ {
+		s.putCell(newbuf, newLine.At(x))
 	}
 
 	// Restore the margin outside the surface with the default background,
@@ -884,10 +902,11 @@ func (s *TerminalRenderer) repaintLine(newbuf *RenderBuffer, y int) {
 		s.cur.X = surfaceEnd
 	}
 
-	// Adopt the new line as the model of what is on screen.
-	if len(oldLine) == len(newLine) {
-		copy(oldLine, newLine)
-	}
+	// Adopt the new line as the model of what is on screen. Line lengths only
+	// differ during a resize, and the renderer's resize block syncs the model
+	// right after the transform loop; copying unconditionally (as the diff
+	// path does) keeps the model consistent in every state.
+	copy(oldLine, newLine)
 }
 
 // transformLine transforms the given line in the current window to the
@@ -903,6 +922,12 @@ func (s *TerminalRenderer) transformLine(newbuf *RenderBuffer, y int) {
 	// safely position its writes or trust the previous frame's pixels:
 	// repaint the whole line from a known state instead.
 	if lineHasWide(oldLine) || lineHasWide(newLine) {
+		// Wide rows are repainted from a known state, so when both frames
+		// agree the row already shows those pixels (or was moved by a
+		// scroll): a repaint would reproduce the same output, so skip it.
+		if linesEqual(oldLine, newLine) {
+			return
+		}
 		s.repaintLine(newbuf, y)
 		return
 	}
