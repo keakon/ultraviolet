@@ -790,6 +790,75 @@ func (s *TerminalRenderer) el0Cost() int {
 	return len(ansi.EraseLineRight)
 }
 
+// lineHasWide reports whether the line contains a wide cell (width > 1).
+// Wide cells are the model-visible sources of cursor drift: the terminal
+// advances the cursor per glyph using its own width tables, and for some
+// sequences (notably emoji presentation sequences such as keycap digits, which
+// several terminals paint one column wide while the model measures two) the
+// two disagree. A cell-level diff positions its writes relative to the model's
+// cursor, so once a row's painted width drifts from the model's, every later
+// diff-based write on that row lands at a column the model cannot predict and
+// the row's right edge can stay unfilled.
+func lineHasWide(line Line) bool {
+	for i := 0; i < len(line); i++ {
+		if line[i].Width > 1 {
+			return true
+		}
+	}
+	return false
+}
+
+// repaintLine repaints a line from scratch. Unlike
+// [TerminalRenderer.transformLine] it does not diff against the previous
+// frame: it moves to the true column 0 (carriage return reaches column 0
+// regardless of any accumulated drift), erases the whole line so the tail is
+// filled through the physical end of line, and rewrites the content cells
+// from that known-empty state. Erasing with the line's own trailing blank
+// style keeps card-like surfaces intact: the erased tail carries the same
+// background the erased cells had.
+func (s *TerminalRenderer) repaintLine(newbuf *RenderBuffer, y int) {
+	oldLine := s.curbuf.Line(y)
+	newLine := newbuf.Line(y)
+
+	// Carriage return is the only horizontal move whose destination the model
+	// knows exactly; relative moves and overwrites would inherit any drift.
+	_ = s.buf.WriteByte('\r')
+	s.cur.X = 0
+	s.atPhantom = false
+	s.move(newbuf, 0, y)
+
+	// Erase with the line's trailing cell when it is a plain blank, so the
+	// erased tail keeps the surface's background color (BCE); otherwise fall
+	// back to the current pen.
+	pen := newLine.At(newbuf.Width() - 1)
+	if pen == nil || !canClearWith(pen) {
+		empty := EmptyCell
+		pen = &empty
+	}
+	s.updatePen(pen)
+	_, _ = s.buf.WriteString(ansi.EraseLineRight)
+
+	// Write the content cells. The line was just erased, so trailing cells
+	// equal to the pen need no write, and writing them would risk wrapping
+	// past the right margin if the terminal painted a wide cell wider than
+	// the model measured.
+	blank := s.clearBlank()
+	last := -1
+	for x := 0; x < newbuf.Width(); x++ {
+		if c := newLine.At(x); c != nil && !c.IsZero() && !cellEqual(c, blank) {
+			last = x
+		}
+	}
+	for x := 0; x <= last; x++ {
+		s.putCell(newbuf, newLine.At(x))
+	}
+
+	// Adopt the new line as the model of what is on screen.
+	if len(oldLine) == len(newLine) {
+		copy(oldLine, newLine)
+	}
+}
+
 // transformLine transforms the given line in the current window to the
 // corresponding line in the new window. It uses [ansi.ICH] and [ansi.DCH] to
 // insert or delete characters.
@@ -797,6 +866,15 @@ func (s *TerminalRenderer) transformLine(newbuf *RenderBuffer, y int) {
 	var firstCell, oLastCell, nLastCell int // first, old last, new last index
 	oldLine := s.curbuf.Line(y)
 	newLine := newbuf.Line(y)
+
+	// If either frame's line holds a wide cell, the row's painted width can
+	// drift from the model's (see [lineHasWide]), so a cell-level diff cannot
+	// safely position its writes or trust the previous frame's pixels:
+	// repaint the whole line from a known state instead.
+	if lineHasWide(oldLine) || lineHasWide(newLine) {
+		s.repaintLine(newbuf, y)
+		return
+	}
 
 	// Find the first changed cell in the line
 	blank := newLine.At(0)
