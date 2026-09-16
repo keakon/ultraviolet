@@ -325,40 +325,40 @@ func ReadStyle(params ansi.Params, pen *Style) {
 		case 29: // Not crossed out
 			pen.Attrs &^= AttrStrikethrough
 		case 30, 31, 32, 33, 34, 35, 36, 37: // Set foreground
-			pen.Fg = ansi.Black + ansi.BasicColor(param-30) //nolint:gosec
+			pen.Fg = ColorFrom(ansi.Black + ansi.BasicColor(param-30)) //nolint:gosec
 		case 38: // Set foreground 256 or truecolor
 			var c color.Color
 			n := ansi.ReadStyleColor(params[i:], &c)
 			if n > 0 {
-				pen.Fg = c
+				pen.Fg = ColorFrom(c)
 				i += n - 1
 			}
 		case 39: // Default foreground
-			pen.Fg = nil
+			pen.Fg = Color{}
 		case 40, 41, 42, 43, 44, 45, 46, 47: // Set background
-			pen.Bg = ansi.Black + ansi.BasicColor(param-40) //nolint:gosec
+			pen.Bg = ColorFrom(ansi.Black + ansi.BasicColor(param-40)) //nolint:gosec
 		case 48: // Set background 256 or truecolor
 			var c color.Color
 			n := ansi.ReadStyleColor(params[i:], &c)
 			if n > 0 {
-				pen.Bg = c
+				pen.Bg = ColorFrom(c)
 				i += n - 1
 			}
 		case 49: // Default Background
-			pen.Bg = nil
+			pen.Bg = Color{}
 		case 58: // Set underline color
 			var c color.Color
 			n := ansi.ReadStyleColor(params[i:], &c)
 			if n > 0 {
-				pen.UnderlineColor = c
+				pen.UnderlineColor = ColorFrom(c)
 				i += n - 1
 			}
 		case 59: // Default underline color
-			pen.UnderlineColor = nil
+			pen.UnderlineColor = Color{}
 		case 90, 91, 92, 93, 94, 95, 96, 97: // Set bright foreground
-			pen.Fg = ansi.BrightBlack + ansi.BasicColor(param-90) //nolint:gosec
+			pen.Fg = ColorFrom(ansi.BrightBlack + ansi.BasicColor(param-90)) //nolint:gosec
 		case 100, 101, 102, 103, 104, 105, 106, 107: // Set bright background
-			pen.Bg = ansi.BrightBlack + ansi.BasicColor(param-100) //nolint:gosec
+			pen.Bg = ColorFrom(ansi.BrightBlack + ansi.BasicColor(param-100)) //nolint:gosec
 		}
 	}
 }
@@ -369,6 +369,5 @@ func ReadLink(p []byte, link *Link) {
 	if len(params) != 3 {
 		return
 	}
-	link.Params = string(params[1])
-	link.URL = string(params[2])
+	*link = newLink(string(params[2]), string(params[1]))
 }

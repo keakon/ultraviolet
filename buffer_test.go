@@ -614,7 +614,7 @@ func TestLineRenderLine(t *testing.T) {
 			name: "render with styles",
 			setup: func() Line {
 				l := make(Line, 5)
-				l[0] = Cell{Content: "H", Width: 1, Style: Style{Fg: ansi.Red}}
+				l[0] = Cell{Content: "H", Width: 1, Style: Style{Fg: ColorFrom(ansi.Red)}}
 				l[1] = Cell{Content: "i", Width: 1}
 				return l
 			},
@@ -629,10 +629,10 @@ func TestLineRenderLine(t *testing.T) {
 			name: "render with hyperlink",
 			setup: func() Line {
 				l := make(Line, 5)
-				l[0] = Cell{Content: "L", Width: 1, Link: Link{URL: "http://example.com"}}
-				l[1] = Cell{Content: "i", Width: 1, Link: Link{URL: "http://example.com"}}
-				l[2] = Cell{Content: "n", Width: 1, Link: Link{URL: "http://example.com"}}
-				l[3] = Cell{Content: "k", Width: 1, Link: Link{URL: "http://example.com"}}
+				l[0] = Cell{Content: "L", Width: 1, Link: NewLink("http://example.com")}
+				l[1] = Cell{Content: "i", Width: 1, Link: NewLink("http://example.com")}
+				l[2] = Cell{Content: "n", Width: 1, Link: NewLink("http://example.com")}
+				l[3] = Cell{Content: "k", Width: 1, Link: NewLink("http://example.com")}
 				return l
 			},
 			validate: func(t *testing.T, output string) {
@@ -664,6 +664,27 @@ func BenchmarkBufferSetCell(b *testing.B) {
 		x := i % 80
 		y := (i / 80) % 24
 		buf.SetCell(x, y, cell)
+	}
+}
+
+func BenchmarkNewBuffer(b *testing.B) {
+	b.ReportAllocs()
+	var buf *Buffer
+	for b.Loop() {
+		buf = NewBuffer(200, 50)
+	}
+	_ = buf
+}
+
+func BenchmarkLineCopy(b *testing.B) {
+	src := NewLine(200)
+	for i := range src {
+		src[i].Style = Style{Fg: ColorFrom(ansi.IndexedColor(33)), Bg: ColorFrom(ansi.IndexedColor(17)), Attrs: AttrBold}
+	}
+	dst := make(Line, 200)
+	b.ReportAllocs()
+	for b.Loop() {
+		copy(dst, src)
 	}
 }
 

@@ -572,8 +572,8 @@ func (s *TerminalRenderer) updatePen(cell *Cell) {
 		_, _ = s.buf.WriteString(seq)
 		s.cur.Style = cell.Style // Copy the original style
 	}
-	if !newLink.Equal(&oldLink) {
-		_, _ = s.buf.WriteString(ansi.SetHyperlink(newLink.URL, newLink.Params))
+	if !newLink.Equal(oldLink) {
+		_, _ = s.buf.WriteString(ansi.SetHyperlink(newLink.URL(), newLink.Params()))
 		s.cur.Link = cell.Link // Copy the original link
 	}
 }
@@ -1545,7 +1545,7 @@ func relativeCursorMove(s *TerminalRenderer, newbuf *RenderBuffer, fx, fy, tx, t
 					cell := newbuf.CellAt(fx+i, ty)
 					if cell != nil && cell.Width > 0 {
 						i += cell.Width - 1
-						if !cell.Style.Equal(&s.cur.Style) || !cell.Link.Equal(&s.cur.Link) {
+						if !cell.Style.Equal(&s.cur.Style) || !cell.Link.Equal(s.cur.Link) {
 							overwrite = false
 							break
 						}

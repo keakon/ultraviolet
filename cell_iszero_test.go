@@ -36,7 +36,7 @@ func TestCellIsZero_RecursiveColorPanicsOrHangs(t *testing.T) {
 		Content: "x",
 		Width:   1,
 		Style: Style{
-			Fg: &recursiveColor{r: 255, g: 0, b: 0, a: 255},
+			Fg: ColorFrom(&recursiveColor{r: 255, g: 0, b: 0, a: 255}),
 		},
 	}
 
@@ -60,7 +60,7 @@ func TestCellIsZero_RecursiveColorPanicsOrHangs(t *testing.T) {
 // TestStyleIsZero_RecursiveColorPanicsOrHangs tests the same issue for Style.IsZero().
 func TestStyleIsZero_RecursiveColorPanicsOrHangs(t *testing.T) {
 	s := &Style{
-		Fg: &recursiveColor{r: 255, g: 0, b: 0, a: 255},
+		Fg: ColorFrom(&recursiveColor{r: 255, g: 0, b: 0, a: 255}),
 	}
 
 	done := make(chan struct{})

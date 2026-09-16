@@ -57,7 +57,7 @@ func (c *Cell) Equal(o *Cell) bool {
 		c.Width == o.Width &&
 		c.Content == o.Content &&
 		c.Style.Equal(&o.Style) &&
-		c.Link.Equal(&o.Link)
+		c.Link.Equal(o.Link)
 }
 
 // IsZero returns whether the cell is an empty cell.
@@ -81,31 +81,73 @@ func (c *Cell) Empty() {
 
 // NewLink creates a new hyperlink with the given URL and parameters.
 func NewLink(url string, params ...string) Link {
-	return Link{
-		URL:    url,
-		Params: strings.Join(params, ":"),
-	}
+	return newLink(url, strings.Join(params, ":"))
 }
 
-// Link represents a hyperlink in the terminal screen.
+// newLink builds a link from its raw fields. Both fields must be empty for the
+// result to be the zero link, so that an empty link compares equal to no link.
+func newLink(url, params string) Link {
+	if url == "" && params == "" {
+		return Link{}
+	}
+	return Link{data: &linkData{
+		URL:    url,
+		Params: params,
+	}}
+}
+
+// Link represents a hyperlink in the terminal screen. The zero value is a link
+// with no URL.
+//
+// A link holds a single pointer to its URL and parameters: a screen buffer
+// keeps a link for every cell, and hyperlinks are rare, so cells share one
+// link instead of embedding its strings.
 type Link struct {
+	data *linkData
+}
+
+// linkData holds the URL and parameters of a [Link].
+type linkData struct {
 	URL    string
 	Params string
 }
 
+// URL returns the link's URL, or an empty string if the link is unset.
+func (h Link) URL() string {
+	if h.data == nil {
+		return ""
+	}
+	return h.data.URL
+}
+
+// Params returns the link's parameters, or an empty string if the link is
+// unset.
+func (h Link) Params() string {
+	if h.data == nil {
+		return ""
+	}
+	return h.data.Params
+}
+
 // String returns a string representation of the hyperlink.
-func (h *Link) String() string {
-	return h.URL
+func (h Link) String() string {
+	return h.URL()
 }
 
 // Equal returns whether the hyperlink is equal to the other hyperlink.
-func (h *Link) Equal(o *Link) bool {
-	return o != nil && *h == *o
+func (h Link) Equal(o Link) bool {
+	if h.data == o.data {
+		return true
+	}
+	if h.data == nil || o.data == nil {
+		return false
+	}
+	return *h.data == *o.data
 }
 
 // IsZero returns whether the hyperlink is empty.
-func (h *Link) IsZero() bool {
-	return *h == Link{}
+func (h Link) IsZero() bool {
+	return h.data == nil || *h.data == linkData{}
 }
 
 // These are the available text attributes that can be combined to create
@@ -160,11 +202,113 @@ const (
 	UnderlineStyleDashed = ansi.UnderlineDashed
 )
 
+// colorKind discriminates the representation of a [Color].
+type colorKind uint8
+
+const (
+	colorKindNone colorKind = iota
+	colorKindBasic
+	colorKindIndexed
+	colorKindRGB
+)
+
+// Color is a terminal color: an ANSI 3/4-bit or 8-bit palette index, or a
+// 24-bit RGB value. The zero value means no color, which renders as the
+// terminal's default color.
+//
+// The whole color fits in one word: a screen buffer stores a cell for every
+// position, and every cell is copied on each buffer write, so the size of a
+// [Color] directly drives the memory and copy cost of a screen.
+type Color struct {
+	v uint32 // kind in the top 2 bits, payload in the rest
+}
+
+// ColorFrom returns the [Color] matching c, which may be an [ansi.BasicColor],
+// an [ansi.IndexedColor], or any other [color.Color] handled as a 24-bit RGB
+// value. It returns the zero [Color] if c is nil.
+func ColorFrom(c color.Color) Color {
+	switch c := c.(type) {
+	case nil:
+		return Color{}
+	case Color:
+		return c
+	case ansi.BasicColor:
+		return Color{v: uint32(colorKindBasic)<<30 | uint32(c)}
+	case ansi.IndexedColor:
+		return Color{v: uint32(colorKindIndexed)<<30 | uint32(c)}
+	default:
+		r, g, b, _ := c.RGBA()
+		return Color{v: uint32(colorKindRGB)<<30 | (r>>8)<<16 | (g>>8)<<8 | (b >> 8)}
+	}
+}
+
+func (c Color) kind() colorKind {
+	return colorKind(c.v >> 30)
+}
+
+func (c Color) payload() uint32 {
+	return c.v & (1<<30 - 1)
+}
+
+// IsZero returns whether the color is unset.
+func (c Color) IsZero() bool {
+	return c.v == 0
+}
+
+// Equal returns whether the two colors are the same color. Colors of different
+// representations compare equal when they resolve to the same RGB color.
+func (c Color) Equal(o Color) bool {
+	if c.v == o.v {
+		return true
+	}
+	if c.v == 0 || o.v == 0 {
+		return false
+	}
+	if c.kind() != o.kind() {
+		cr, cg, cb, ca := c.RGBA()
+		or, og, ob, oa := o.RGBA()
+		return cr == or && cg == og && cb == ob && ca == oa
+	}
+	return false
+}
+
+// RGBA returns the red, green, blue, and alpha components of the color. It
+// implements [color.Color].
+func (c Color) RGBA() (r, g, b, a uint32) {
+	switch c.kind() {
+	case colorKindBasic:
+		return ansi.BasicColor(c.payload()).RGBA()
+	case colorKindIndexed:
+		return ansi.IndexedColor(c.payload()).RGBA()
+	case colorKindRGB:
+		rgb := c.payload()
+		r, g, b = (rgb>>16&0xff)*0x101, (rgb>>8&0xff)*0x101, (rgb&0xff)*0x101
+		return r, g, b, 0xffff
+	default:
+		return 0, 0, 0, 0
+	}
+}
+
+// color returns the color as a [color.Color] for the ANSI encoder. It returns
+// nil if the color is unset.
+func (c Color) color() color.Color {
+	switch c.kind() {
+	case colorKindBasic:
+		return ansi.BasicColor(c.payload())
+	case colorKindIndexed:
+		return ansi.IndexedColor(c.payload())
+	case colorKindRGB:
+		return c
+	default:
+		return nil
+	}
+}
+
 // Style represents the style of a cell.
 type Style struct {
-	Fg             color.Color
-	Bg             color.Color
-	UnderlineColor color.Color
+	Fg             Color
+	Bg             Color
+	UnderlineColor Color
 	Underline      Underline
 	Attrs          uint8
 }
@@ -173,9 +317,9 @@ type Style struct {
 func (s *Style) Equal(o *Style) bool {
 	return s.Attrs == o.Attrs &&
 		s.Underline == o.Underline &&
-		colorEqual(s.Fg, o.Fg) &&
-		colorEqual(s.Bg, o.Bg) &&
-		colorEqual(s.UnderlineColor, o.UnderlineColor)
+		s.Fg.Equal(o.Fg) &&
+		s.Bg.Equal(o.Bg) &&
+		s.UnderlineColor.Equal(o.UnderlineColor)
 }
 
 // Styled wraps the given string with the style's ANSI sequences and resets.
@@ -234,14 +378,14 @@ func (s *Style) String() string {
 			b = b.UnderlineStyle(UnderlineStyleDashed)
 		}
 	}
-	if s.Fg != nil {
-		b = b.ForegroundColor(s.Fg)
+	if !s.Fg.IsZero() {
+		b = b.ForegroundColor(s.Fg.color())
 	}
-	if s.Bg != nil {
-		b = b.BackgroundColor(s.Bg)
+	if !s.Bg.IsZero() {
+		b = b.BackgroundColor(s.Bg.color())
 	}
-	if s.UnderlineColor != nil {
-		b = b.UnderlineColor(s.UnderlineColor)
+	if !s.UnderlineColor.IsZero() {
+		b = b.UnderlineColor(s.UnderlineColor.color())
 	}
 
 	return b.String()
@@ -278,20 +422,20 @@ func StyleDiff(from, to *Style) string {
 
 	var b ansi.Style
 
-	if !colorEqual(from.Fg, to.Fg) {
-		b = b.ForegroundColor(to.Fg)
+	if !from.Fg.Equal(to.Fg) {
+		b = b.ForegroundColor(to.Fg.color())
 	}
 
-	if !colorEqual(from.Bg, to.Bg) {
-		b = b.BackgroundColor(to.Bg)
+	if !from.Bg.Equal(to.Bg) {
+		b = b.BackgroundColor(to.Bg.color())
 	}
 
-	if !colorEqual(from.UnderlineColor, to.UnderlineColor) {
+	if !from.UnderlineColor.Equal(to.UnderlineColor) {
 		// TODO: Investigate this. For backward compatibility, we might want to
 		// set this at the end instead. Because on terminals that don't support
 		// underline color, this might mess up some other attributes if set in
 		// the middle.
-		b = b.UnderlineColor(to.UnderlineColor)
+		b = b.UnderlineColor(to.UnderlineColor.color())
 	}
 
 	fromBold := from.Attrs&AttrBold != 0
@@ -407,18 +551,6 @@ func StyleDiff(from, to *Style) string {
 	return b.String()
 }
 
-func colorEqual(c, o color.Color) bool {
-	if c == nil && o == nil {
-		return true
-	}
-	if c == nil || o == nil {
-		return false
-	}
-	cr, cg, cb, ca := c.RGBA()
-	or, og, ob, oa := o.RGBA()
-	return cr == or && cg == og && cb == ob && ca == oa
-}
-
 // IsZero returns true if the style is empty.
 func (s *Style) IsZero() bool {
 	return *s == Style{}
@@ -431,23 +563,39 @@ func ConvertStyle(s Style, p colorprofile.Profile) Style {
 		return s
 	case colorprofile.ANSI, colorprofile.ANSI256:
 	case colorprofile.Ascii:
-		s.Fg = nil
-		s.Bg = nil
-		s.UnderlineColor = nil
+		s.Fg = Color{}
+		s.Bg = Color{}
+		s.UnderlineColor = Color{}
 	case colorprofile.NoTTY:
 		return Style{}
 	}
 
-	if s.Fg != nil {
-		s.Fg = p.Convert(s.Fg)
-	}
-	if s.Bg != nil {
-		s.Bg = p.Convert(s.Bg)
-	}
-	if s.UnderlineColor != nil {
-		s.UnderlineColor = p.Convert(s.UnderlineColor)
-	}
+	s.Fg = convertColor(s.Fg, p)
+	s.Bg = convertColor(s.Bg, p)
+	s.UnderlineColor = convertColor(s.UnderlineColor, p)
 	return s
+}
+
+// convertColor converts a single color to respect the given color profile.
+func convertColor(c Color, p colorprofile.Profile) Color {
+	switch c.kind() {
+	case colorKindNone, colorKindBasic:
+		return c
+	case colorKindIndexed:
+		if p == colorprofile.ANSI {
+			return ColorFrom(ansi.Convert16(ansi.IndexedColor(c.payload())))
+		}
+		return c
+	default:
+		switch p {
+		case colorprofile.ANSI256:
+			return ColorFrom(ansi.Convert256(c))
+		case colorprofile.ANSI:
+			return ColorFrom(ansi.Convert16(c))
+		default:
+			return c
+		}
+	}
 }
 
 // ConvertLink converts a hyperlink to respect the given color profile.

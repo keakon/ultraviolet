@@ -116,7 +116,7 @@ func TestRendererColorProfile(t *testing.T) {
 			cell := Cell{
 				Content: "X",
 				Width:   1,
-				Style:   Style{Fg: color.RGBA{R: 255, G: 0, B: 0, A: 255}},
+				Style:   Style{Fg: ColorFrom(color.RGBA{R: 255, G: 0, B: 0, A: 255})},
 			}
 			cellbuf.SetCell(0, 0, &cell)
 
@@ -553,9 +553,9 @@ func TestRendererStyledText(t *testing.T) {
 	// Test various styles
 	styles := []Style{
 		{Attrs: AttrBold},
-		{Fg: color.RGBA{R: 255, G: 0, B: 0, A: 255}},
-		{Bg: color.RGBA{R: 0, G: 255, B: 0, A: 255}},
-		{Attrs: AttrBold, Fg: color.RGBA{R: 0, G: 0, B: 255, A: 255}},
+		{Fg: ColorFrom(color.RGBA{R: 255, G: 0, B: 0, A: 255})},
+		{Bg: ColorFrom(color.RGBA{R: 0, G: 255, B: 0, A: 255})},
+		{Attrs: AttrBold, Fg: ColorFrom(color.RGBA{R: 0, G: 0, B: 255, A: 255})},
 	}
 
 	for i, style := range styles {
@@ -1041,7 +1041,7 @@ func TestRendererColorDownsampling(t *testing.T) {
 			cell := Cell{
 				Content: "C",
 				Width:   1,
-				Style:   Style{Fg: color.RGBA{R: 123, G: 234, B: 45, A: 255}},
+				Style:   Style{Fg: ColorFrom(color.RGBA{R: 123, G: 234, B: 45, A: 255})},
 			}
 			cellbuf.SetCell(0, 0, &cell)
 

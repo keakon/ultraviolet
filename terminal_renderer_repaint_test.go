@@ -15,7 +15,7 @@ import (
 var repaintCardBg = color.RGBA{R: 0x4e, G: 0x4e, B: 0x4e, A: 0xff}
 
 func repaintBlank() *Cell {
-	return &Cell{Content: " ", Width: 1, Style: Style{Bg: repaintCardBg}}
+	return &Cell{Content: " ", Width: 1, Style: Style{Bg: ColorFrom(repaintCardBg)}}
 }
 
 // fillRepaintRow writes the given cells starting at column 0 of the row,
@@ -228,7 +228,7 @@ func TestRepaintLineInteriorBlankKeepsPositioning(t *testing.T) {
 	fillRepaintRow(cellbuf, 0, true,
 		Cell{Content: "1️⃣", Width: 2},
 		Cell{Content: "a", Width: 1},
-		Cell{Content: " ", Width: 1, Style: Style{Bg: repaintCardBg}},
+		Cell{Content: " ", Width: 1, Style: Style{Bg: ColorFrom(repaintCardBg)}},
 		Cell{Content: "b", Width: 1},
 	)
 	r.Render(cellbuf)
