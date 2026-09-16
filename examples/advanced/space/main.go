@@ -8,8 +8,8 @@ import (
 	"math/rand"
 	"time"
 
-	uv "github.com/charmbracelet/ultraviolet"
-	"github.com/charmbracelet/ultraviolet/screen"
+	uv "github.com/keakon/ultraviolet"
+	"github.com/keakon/ultraviolet/screen"
 )
 
 func setupColors(width, height int) [][]color.Color {
@@ -113,8 +113,8 @@ LOOP:
 						fg := colors[y*2][xi]
 						bg := colors[y*2+1][xi]
 						st := uv.Style{
-							Fg: fg,
-							Bg: bg,
+							Fg: uv.ColorFrom(fg),
+							Bg: uv.ColorFrom(bg),
 						}
 						scr.SetCell(x, y, &uv.Cell{
 							Content: "▀",

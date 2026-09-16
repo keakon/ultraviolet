@@ -3,7 +3,7 @@ package conformance_test
 import (
 	"testing"
 
-	"github.com/charmbracelet/ultraviolet/internal/conformance"
+	"github.com/keakon/ultraviolet/internal/conformance"
 )
 
 // A screen that shrinks narrow enough to rewrap a row, then grows again, is the

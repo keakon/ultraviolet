@@ -6,8 +6,8 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	uv "github.com/charmbracelet/ultraviolet"
-	"github.com/charmbracelet/ultraviolet/screen"
+	uv "github.com/keakon/ultraviolet"
+	"github.com/keakon/ultraviolet/screen"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/mattn/go-runewidth"
 )
@@ -179,7 +179,7 @@ LOOP:
 					}
 					r, rw := utf8.DecodeRuneInString(text)
 					if rw == 1 && unicode.IsDigit(r) {
-						pen.Style.Fg = ansi.Black + ansi.BasicColor(r-'0')
+						pen.Style.Fg = uv.ColorFrom(ansi.Black + ansi.BasicColor(r-'0'))
 						break
 					}
 					pen.Content = text

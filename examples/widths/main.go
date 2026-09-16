@@ -18,7 +18,7 @@ import (
 	"log"
 	"strings"
 
-	uv "github.com/charmbracelet/ultraviolet"
+	uv "github.com/keakon/ultraviolet"
 	"github.com/charmbracelet/x/ansi"
 )
 

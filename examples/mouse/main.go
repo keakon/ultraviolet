@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	uv "github.com/charmbracelet/ultraviolet"
-	"github.com/charmbracelet/ultraviolet/screen"
+	uv "github.com/keakon/ultraviolet"
+	"github.com/keakon/ultraviolet/screen"
 	"github.com/charmbracelet/x/ansi"
 )
 
@@ -34,8 +34,8 @@ func main() {
 	display := func() {
 		label := fmt.Sprintf(" Button: %-12s Position: (%d, %d)", lastBtn, lastX, lastY)
 		var st uv.Style
-		st.Bg = ansi.BasicColor(4)
-		st.Fg = ansi.Black
+		st.Bg = uv.ColorFrom(ansi.BasicColor(4))
+		st.Fg = uv.ColorFrom(ansi.Black)
 		bg := uv.EmptyCell
 		bg.Style = st
 		screen.FillArea(scr, &bg, uv.Rect(0, 0, width, 1))

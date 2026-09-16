@@ -9,8 +9,8 @@ import (
 	"slices"
 	"sync"
 
-	uv "github.com/charmbracelet/ultraviolet"
-	"github.com/charmbracelet/ultraviolet/screen"
+	uv "github.com/keakon/ultraviolet"
+	"github.com/keakon/ultraviolet/screen"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/charmbracelet/x/term"
 )
@@ -110,7 +110,7 @@ func (a *App) CreateWindow(id string, x, y, width, height int) *AppWindow {
 	defer a.mtx.Unlock()
 
 	var style uv.Style
-	style.Bg = ansi.IndexedColor(rand.Intn(256))
+	style.Bg = uv.ColorFrom(ansi.IndexedColor(rand.Intn(256)))
 
 	win := a.root.win.NewWindow(x, y, width, height)
 	win.Fill(&uv.Cell{

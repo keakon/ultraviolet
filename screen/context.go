@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"image/color"
 
-	uv "github.com/charmbracelet/ultraviolet"
+	uv "github.com/keakon/ultraviolet"
 	"github.com/clipperhouse/uax29/v2/graphemes"
 )
 

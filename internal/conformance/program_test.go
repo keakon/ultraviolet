@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/charmbracelet/ultraviolet/internal/conformance"
+	"github.com/keakon/ultraviolet/internal/conformance"
 	"github.com/charmbracelet/x/ansi"
 )
 

@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	uv "github.com/charmbracelet/ultraviolet"
-	"github.com/charmbracelet/ultraviolet/internal/conformance"
+	uv "github.com/keakon/ultraviolet"
+	"github.com/keakon/ultraviolet/internal/conformance"
 	"github.com/charmbracelet/x/ansi"
 )
 

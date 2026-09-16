@@ -1,18 +1,19 @@
-module github.com/charmbracelet/ultraviolet/internal/conformance
+module github.com/keakon/ultraviolet/internal/conformance
 
 go 1.26.0
 
-replace github.com/charmbracelet/ultraviolet => ../..
+replace github.com/keakon/ultraviolet => ../..
 
 require (
-	github.com/charmbracelet/ultraviolet v0.0.0-20260303162955-0b88c25f3fff
 	github.com/charmbracelet/x/ansi v0.11.8
 	github.com/charmbracelet/x/vt v0.0.0-20260901172002-a5dee49b2863
+	github.com/keakon/ultraviolet v0.0.0-20260303162955-0b88c25f3fff
 	go.mitchellh.com/libghostty v0.0.0-20260727203050-ef0f8ce3daa7
 )
 
 require (
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect
+	github.com/charmbracelet/ultraviolet v0.0.0-20260303162955-0b88c25f3fff // indirect
 	github.com/charmbracelet/x/exp/ordered v0.1.0 // indirect
 	github.com/charmbracelet/x/term v0.2.2 // indirect
 	github.com/charmbracelet/x/termios v0.1.1 // indirect
