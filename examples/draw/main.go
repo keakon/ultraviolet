@@ -179,7 +179,7 @@ LOOP:
 					}
 					r, rw := utf8.DecodeRuneInString(text)
 					if rw == 1 && unicode.IsDigit(r) {
-						pen.Style.Fg = ansi.Black + ansi.BasicColor(r-'0')
+						pen.Style.Fg = uv.ColorFrom(ansi.Black + ansi.BasicColor(r-'0'))
 						break
 					}
 					pen.Content = text

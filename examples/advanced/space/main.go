@@ -113,8 +113,8 @@ LOOP:
 						fg := colors[y*2][xi]
 						bg := colors[y*2+1][xi]
 						st := uv.Style{
-							Fg: fg,
-							Bg: bg,
+							Fg: uv.ColorFrom(fg),
+							Bg: uv.ColorFrom(bg),
 						}
 						scr.SetCell(x, y, &uv.Cell{
 							Content: "▀",

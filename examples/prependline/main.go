@@ -24,8 +24,8 @@ func main() {
 
 	var st uv.Style
 	bg := 1
-	st.Bg = ansi.BasicColor(bg)
-	st.Fg = ansi.Black
+	st.Bg = uv.ColorFrom(ansi.BasicColor(bg))
+	st.Fg = uv.ColorFrom(ansi.Black)
 
 	display := func() {
 		const hw = "Hello, World!"
@@ -59,14 +59,14 @@ func main() {
 				return
 			}
 
-			st.Bg = ansi.BasicColor(rand.Intn(16))
+			st.Bg = uv.ColorFrom(ansi.BasicColor(rand.Intn(16)))
 		}
 
 		// Log event (this will appear above when we exit altscreen)
 		scr.InsertAbove(fmt.Sprintf("%T %v", ev, ev))
 
 		rd := rand.Intn(8)
-		st.Bg = ansi.BasicColor(rd)
+		st.Bg = uv.ColorFrom(ansi.BasicColor(rd))
 		display()
 	}
 

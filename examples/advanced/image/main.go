@@ -170,7 +170,7 @@ func main() {
 	imgOffsetX = winSize.Width/2 - imgCellW/2
 	imgOffsetY = winSize.Height/2 - imgCellH/2
 
-	fillStyle := uv.Style{Fg: ansi.IndexedColor(240)}
+	fillStyle := uv.Style{Fg: uv.ColorFrom(ansi.IndexedColor(240))}
 	displayImg := func() {
 		img := charmImg
 		imgArea := uv.Rect(
@@ -283,13 +283,13 @@ func main() {
 					content = append(content, kitty.Diacritic(extra))
 				}
 				scr.SetCell(imgArea.Min.X, imgArea.Min.Y+y, &uv.Cell{
-					Style:   uv.Style{Fg: fg},
+					Style:   uv.Style{Fg: uv.ColorFrom(fg)},
 					Content: string(content),
 					Width:   1,
 				})
 				for x := 1; x < imgArea.Dx(); x++ {
 					scr.SetCell(imgArea.Min.X+x, imgArea.Min.Y+y, &uv.Cell{
-						Style:   uv.Style{Fg: fg},
+						Style:   uv.Style{Fg: uv.ColorFrom(fg)},
 						Content: string(kitty.Placeholder),
 						Width:   1,
 					})

@@ -88,7 +88,7 @@ func main() {
 			for j := 0; j < barCount; j++ {
 				bar := uv.Rect(j*barWidth, row.Min.Y, (j+1)*barWidth, row.Max.Y)
 				cell := uv.EmptyCell
-				cell.Style.Bg = rowColors[i][j%len(rowColors[i])]
+				cell.Style.Bg = uv.ColorFrom(rowColors[i][j%len(rowColors[i])])
 				screen.FillArea(scr, &cell, bar)
 			}
 		}
@@ -97,7 +97,7 @@ func main() {
 		for i := 0; i < botBarCount; i++ {
 			bar := uv.Rect(i*botBarWidth, botRow.Min.Y, (i+1)*botBarWidth, botRow.Max.Y)
 			cell := uv.EmptyCell
-			cell.Style.Bg = rowColors[2][i%len(rowColors[2])]
+			cell.Style.Bg = uv.ColorFrom(rowColors[2][i%len(rowColors[2])])
 			screen.FillArea(scr, &cell, bar)
 		}
 
@@ -109,11 +109,11 @@ func main() {
 			cell := uv.EmptyCell
 			switch i {
 			case 0:
-				cell.Style.Bg = fullBlack
+				cell.Style.Bg = uv.ColorFrom(fullBlack)
 			case 1:
 				continue
 			case 2:
-				cell.Style.Bg = lightBlack
+				cell.Style.Bg = uv.ColorFrom(lightBlack)
 			}
 			screen.FillArea(scr, &cell, bar)
 		}

@@ -204,7 +204,7 @@ func renderExample(sc uv.Screen, area uv.Rectangle, constraints ...layout.Constr
 	screen.FillArea(sc, cell(ansi.Blue), b)
 
 	draw := func(bg ansi.Color, s string, r uv.Rectangle) {
-		ctx := screen.NewContext(sc).WithStyle(uv.Style{Bg: bg})
+		ctx := screen.NewContext(sc).WithStyle(uv.Style{Bg: uv.ColorFrom(bg)})
 
 		ctx.DrawString(s[:min(len(s), r.Dx())], r.Min.X, r.Min.Y)
 	}
@@ -244,7 +244,7 @@ func cell(bg ansi.Color) *uv.Cell {
 		Content: " ",
 		Width:   1,
 		Style: uv.Style{
-			Bg: bg,
+			Bg: uv.ColorFrom(bg),
 		},
 	}
 }

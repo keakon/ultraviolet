@@ -2,14 +2,14 @@ module examples
 
 go 1.25.0
 
-replace github.com/charmbracelet/ultraviolet => ../
+replace github.com/keakon/ultraviolet => ../
 
 require (
 	charm.land/lipgloss/v2 v2.0.0-beta.3.0.20251106193318-19329a3e8410
-	github.com/charmbracelet/ultraviolet v0.0.0-20251106190538-99ea45596692
 	github.com/charmbracelet/x/ansi v0.11.7
 	github.com/charmbracelet/x/mosaic v0.0.0-20250509021451-13796e822d86
 	github.com/charmbracelet/x/term v0.2.2
+	github.com/keakon/ultraviolet v0.0.1-fork.4
 	github.com/lucasb-eyer/go-colorful v1.4.0
 	github.com/mattn/go-runewidth v0.0.23
 	github.com/rivo/uniseg v0.4.7
@@ -18,6 +18,7 @@ require (
 require (
 	github.com/bits-and-blooms/bitset v1.24.4 // indirect
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect
+	github.com/charmbracelet/ultraviolet v0.0.0-20251106190538-99ea45596692 // indirect
 	github.com/charmbracelet/x/termios v0.1.1 // indirect
 	github.com/charmbracelet/x/windows v0.2.2 // indirect
 	github.com/clipperhouse/displaywidth v0.11.0 // indirect
