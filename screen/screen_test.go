@@ -853,7 +853,7 @@ func TestEdgeCases(t *testing.T) {
 		scr.SetCell(0, 0, linkedCell)
 
 		cloned := Clone(scr)
-		if cell := cloned.CellAt(0, 0); cell == nil || cell.Content != "L" || cell.Link.URL != "https://example.com" {
+		if cell := cloned.CellAt(0, 0); cell == nil || cell.Content != "L" || cell.Link.URL() != "https://example.com" {
 			t.Errorf("Cell with link not cloned correctly, got %v", cell)
 		}
 	})

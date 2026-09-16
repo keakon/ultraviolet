@@ -36,7 +36,7 @@ func TestStyledWideCellPlaceholderDetection(t *testing.T) {
 
 	t.Run("styled wide cell: checks disagree (regression)", func(t *testing.T) {
 		l := make(Line, 5)
-		l.Set(0, &Cell{Content: "你", Width: 2, Style: Style{Bg: ansi.Red}})
+		l.Set(0, &Cell{Content: "你", Width: 2, Style: Style{Bg: ColorFrom(ansi.Red)}})
 
 		ph := l.At(1)
 		if ph.Width != 0 {

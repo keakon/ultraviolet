@@ -122,10 +122,10 @@ func TestBorderStyleAndLink(t *testing.T) {
 	if !b.TopLeft.Style.Equal(&style) || !b.TopRight.Style.Equal(&style) || !b.BottomLeft.Style.Equal(&style) || !b.BottomRight.Style.Equal(&style) {
 		t.Fatalf("style not applied to all corners")
 	}
-	if !b.Top.Link.Equal(&link) || !b.Bottom.Link.Equal(&link) || !b.Left.Link.Equal(&link) || !b.Right.Link.Equal(&link) {
+	if !b.Top.Link.Equal(link) || !b.Bottom.Link.Equal(link) || !b.Left.Link.Equal(link) || !b.Right.Link.Equal(link) {
 		t.Fatalf("link not applied to all sides")
 	}
-	if !b.TopLeft.Link.Equal(&link) || !b.TopRight.Link.Equal(&link) || !b.BottomLeft.Link.Equal(&link) || !b.BottomRight.Link.Equal(&link) {
+	if !b.TopLeft.Link.Equal(link) || !b.TopRight.Link.Equal(link) || !b.BottomLeft.Link.Equal(link) || !b.BottomRight.Link.Equal(link) {
 		t.Fatalf("link not applied to all corners")
 	}
 
@@ -201,7 +201,7 @@ func TestBorderDrawHiddenStyleLink(t *testing.T) {
 
 	for _, p := range checkPos {
 		c := dst.CellAt(p.x, p.y)
-		if c == nil || c.Content != " " || !c.Style.Equal(&style) || !c.Link.Equal(&link) {
+		if c == nil || c.Content != " " || !c.Style.Equal(&style) || !c.Link.Equal(link) {
 			t.Fatalf("expected styled/link space at %d,%d", p.x, p.y)
 		}
 	}

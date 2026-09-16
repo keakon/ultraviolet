@@ -175,12 +175,12 @@ func renderLine(buf io.StringWriter, l Line) {
 		}
 
 		// Write the URL escape sequence
-		if c.Link != link && link.URL != "" {
+		if !c.Link.Equal(link) && link.URL() != "" {
 			_, _ = buf.WriteString(ansi.ResetHyperlink())
 			link = Link{}
 		}
-		if c.Link != link {
-			_, _ = buf.WriteString(ansi.SetHyperlink(c.Link.URL, c.Link.Params))
+		if !c.Link.Equal(link) {
+			_, _ = buf.WriteString(ansi.SetHyperlink(c.Link.URL(), c.Link.Params()))
 			link = c.Link
 		}
 
@@ -190,7 +190,7 @@ func renderLine(buf io.StringWriter, l Line) {
 	if pending.Len() > 0 {
 		_, _ = buf.WriteString(pending.String())
 	}
-	if link.URL != "" {
+	if link.URL() != "" {
 		_, _ = buf.WriteString(ansi.ResetHyperlink())
 	}
 	if !pen.IsZero() {

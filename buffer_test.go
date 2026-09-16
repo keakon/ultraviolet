@@ -614,7 +614,7 @@ func TestLineRenderLine(t *testing.T) {
 			name: "render with styles",
 			setup: func() Line {
 				l := make(Line, 5)
-				l[0] = Cell{Content: "H", Width: 1, Style: Style{Fg: ansi.Red}}
+				l[0] = Cell{Content: "H", Width: 1, Style: Style{Fg: ColorFrom(ansi.Red)}}
 				l[1] = Cell{Content: "i", Width: 1}
 				return l
 			},
@@ -629,10 +629,10 @@ func TestLineRenderLine(t *testing.T) {
 			name: "render with hyperlink",
 			setup: func() Line {
 				l := make(Line, 5)
-				l[0] = Cell{Content: "L", Width: 1, Link: Link{URL: "http://example.com"}}
-				l[1] = Cell{Content: "i", Width: 1, Link: Link{URL: "http://example.com"}}
-				l[2] = Cell{Content: "n", Width: 1, Link: Link{URL: "http://example.com"}}
-				l[3] = Cell{Content: "k", Width: 1, Link: Link{URL: "http://example.com"}}
+				l[0] = Cell{Content: "L", Width: 1, Link: NewLink("http://example.com")}
+				l[1] = Cell{Content: "i", Width: 1, Link: NewLink("http://example.com")}
+				l[2] = Cell{Content: "n", Width: 1, Link: NewLink("http://example.com")}
+				l[3] = Cell{Content: "k", Width: 1, Link: NewLink("http://example.com")}
 				return l
 			},
 			validate: func(t *testing.T, output string) {
@@ -682,7 +682,7 @@ func TestRenderLinePreservesStyledTrailingSpaces(t *testing.T) {
 	l[0] = Cell{Content: "A", Width: 1}
 	// Positions 1-4: spaces with a red background.
 	for i := 1; i < 5; i++ {
-		l[i] = Cell{Content: " ", Width: 1, Style: Style{Bg: ansi.Red}}
+		l[i] = Cell{Content: " ", Width: 1, Style: Style{Bg: ColorFrom(ansi.Red)}}
 	}
 
 	output := l.Render()
@@ -695,7 +695,7 @@ func TestRenderLinePreservesStyledTrailingSpaces(t *testing.T) {
 	// The output must contain the background color sequence for the trailing
 	// spaces. Derive the expected sequence from the style itself rather than
 	// hardcoding an SGR number.
-	red := Style{Bg: ansi.Red}
+	red := Style{Bg: ColorFrom(ansi.Red)}
 	wantSeq := red.Diff(&Style{})
 	if !strings.Contains(output, wantSeq) {
 		t.Errorf("Render() missing background SGR %q for trailing styled spaces; output=%q", wantSeq, output)
@@ -733,6 +733,27 @@ func BenchmarkBufferSetCell(b *testing.B) {
 		x := i % 80
 		y := (i / 80) % 24
 		buf.SetCell(x, y, cell)
+	}
+}
+
+func BenchmarkNewBuffer(b *testing.B) {
+	b.ReportAllocs()
+	var buf *Buffer
+	for b.Loop() {
+		buf = NewBuffer(200, 50)
+	}
+	_ = buf
+}
+
+func BenchmarkLineCopy(b *testing.B) {
+	src := NewLine(200)
+	for i := range src {
+		src[i].Style = Style{Fg: ColorFrom(ansi.IndexedColor(33)), Bg: ColorFrom(ansi.IndexedColor(17)), Attrs: AttrBold}
+	}
+	dst := make(Line, 200)
+	b.ReportAllocs()
+	for b.Loop() {
+		copy(dst, src)
 	}
 }
 
