@@ -2,6 +2,8 @@ module github.com/keakon/ultraviolet
 
 go 1.25.0
 
+toolchain go1.27.1
+
 require (
 	github.com/charmbracelet/colorprofile v0.4.3
 	github.com/charmbracelet/x/ansi v0.11.8
