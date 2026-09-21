@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"image/color"
 
-	uv "github.com/keakon/ultraviolet"
 	"github.com/clipperhouse/uax29/v2/graphemes"
+	uv "github.com/keakon/ultraviolet"
 )
 
 // Context represents a drawing context for rendering operations on a screen.

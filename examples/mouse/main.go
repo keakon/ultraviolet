@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/charmbracelet/x/ansi"
 	uv "github.com/keakon/ultraviolet"
 	"github.com/keakon/ultraviolet/screen"
-	"github.com/charmbracelet/x/ansi"
 )
 
 func main() {

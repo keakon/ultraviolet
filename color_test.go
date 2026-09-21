@@ -16,7 +16,7 @@ var testColors = []color.Color{
 	ansi.IndexedColor(0),
 	ansi.IndexedColor(33),
 	ansi.IndexedColor(255),
-	ansi.TrueColor(0x010203),
+	ansi.TrueColor(0x010203), //nolint:staticcheck // legacy 24-bit color type stays supported by ColorFrom
 	ansi.RGBColor{R: 1, G: 2, B: 3},
 	color.RGBA{R: 1, G: 2, B: 3, A: 255},
 	color.NRGBA{R: 1, G: 2, B: 3, A: 255},

@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/charmbracelet/x/ansi"
 	uv "github.com/keakon/ultraviolet"
 	"github.com/keakon/ultraviolet/internal/conformance"
-	"github.com/charmbracelet/x/ansi"
 )
 
 // runner drives one fuzz program against one emulator.

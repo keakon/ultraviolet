@@ -18,8 +18,8 @@ import (
 	"log"
 	"strings"
 
-	uv "github.com/keakon/ultraviolet"
 	"github.com/charmbracelet/x/ansi"
+	uv "github.com/keakon/ultraviolet"
 )
 
 var samples = []struct {
