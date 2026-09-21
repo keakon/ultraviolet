@@ -8,7 +8,7 @@ require (
 	github.com/charmbracelet/x/ansi v0.11.8
 	github.com/charmbracelet/x/vt v0.0.0-20260901172002-a5dee49b2863
 	github.com/keakon/ultraviolet v0.0.0-20260303162955-0b88c25f3fff
-	go.mitchellh.com/libghostty v0.0.0-20260727203050-ef0f8ce3daa7
+	go.mitchellh.com/libghostty v0.0.0-20260920220152-31b65cdc24cf
 )
 
 require (
