@@ -68,9 +68,9 @@ func newGhostty(t *testing.T, w, h int, grapheme bool) oracle {
 	if err != nil {
 		t.Fatalf("libghostty.NewTerminal(%d, %d): %v", w, h, err)
 	}
-	if err := term.ModeSet(libghostty.ModeGraphemeCluster, grapheme); err != nil {
+	if err := term.SetMode(libghostty.ModeGraphemeCluster, grapheme); err != nil {
 		term.Close()
-		t.Fatalf("ModeSet(ModeGraphemeCluster, %v): %v", grapheme, err)
+		t.Fatalf("SetMode(ModeGraphemeCluster, %v): %v", grapheme, err)
 	}
 	return &ghosttyOracle{term: term, w: w, h: h}
 }
