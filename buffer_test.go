@@ -771,6 +771,33 @@ func BenchmarkBufferResize(b *testing.B) {
 	}
 }
 
+func TestRenderBufferResizeTouchesRows(t *testing.T) {
+	b := NewRenderBuffer(4, 2)
+
+	b.Resize(4, 3)
+	if got := b.TouchedLines(); got != 3 {
+		t.Errorf("resize to 4x3 touched %d rows, want 3", got)
+	}
+
+	fresh := NewRenderBuffer(4, 3)
+	fresh.Resize(4, 3)
+	if got := fresh.TouchedLines(); got != 0 {
+		t.Errorf("resize to the size it already is touched %d rows, want 0", got)
+	}
+
+	// The regression this guards: a frame that collapses and grows back has
+	// rows that come back blank, and a renderer that only diffs touched rows
+	// keeps painting what its model remembers from the taller frame.
+	regrown := NewRenderBuffer(4, 3)
+	regrown.Resize(4, 0)
+	regrown.Resize(4, 3)
+	for y := range regrown.Lines {
+		if regrown.Touched[y] == nil {
+			t.Errorf("collapse and regrow left row %d untouched", y)
+		}
+	}
+}
+
 func width(s string) int {
 	width := 0
 	for _, line := range strings.Split(s, "\n") {

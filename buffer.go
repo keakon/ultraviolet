@@ -687,6 +687,28 @@ func (b *RenderBuffer) Touch(x, y int) {
 	b.TouchLine(x, y, 0)
 }
 
+// Resize resizes the buffer and marks every remaining row as touched.
+//
+// A resize changes what its rows hold even when no cell is written: columns
+// are padded or truncated, rows past the new height are dropped, and a row
+// that comes back after a later grow comes back blank rather than holding what
+// it did. A renderer diffs only the rows it is told about, so without this a
+// frame that lost content between two renders keeps painting the stale row
+// from its model, and the loss stays invisible until some unrelated change
+// disturbs that row.
+func (b *RenderBuffer) Resize(width, height int) {
+	if b.Width() == width && b.Height() == height {
+		// The same size moves nothing, and a caller may resize on every
+		// SIGWINCH. Touching rows here would cost a full diff for no reason.
+		return
+	}
+
+	b.Buffer.Resize(width, height)
+	for y := range b.Lines {
+		b.TouchLine(0, y, width)
+	}
+}
+
 // TouchedLines returns the number of touched lines in the buffer.
 func (b *RenderBuffer) TouchedLines() int {
 	count := 0

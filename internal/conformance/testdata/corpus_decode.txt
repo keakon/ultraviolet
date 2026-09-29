@@ -9,6 +9,7 @@ FuzzRenderer/2da5813835c7c50b	DrawLine,Render,Clear,DrawLine
 FuzzRenderer/31d50934f50a96eb	DrawLine,Clear
 FuzzRenderer/527a4b961803b7bb	DrawLine,Render,Resize
 FuzzRenderer/54189f396b67a971	Clear,Render,DrawLine
+FuzzRenderer/57964ed02fe7403f	DrawLine,Render,Resize,Resize,DrawLine
 FuzzRenderer/650146855c5386c7	DrawLine,DrawLine,DrawLine,DrawLine,Clear,DrawLine,DrawLine,Clear
 FuzzRenderer/765a36e7c507006f	Clear,DrawLine,Render,Clear
 FuzzRenderer/7aba49955341e128	DrawLine,Render,DrawLine
