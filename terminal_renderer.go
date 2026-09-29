@@ -957,25 +957,28 @@ func (s *TerminalRenderer) markDrift(y, height int, drift bool) {
 	s.driftRows[y] = drift
 }
 
-// transformLine transforms the given line in the current window to the
-// corresponding line in the new window. It uses [ansi.ICH] and [ansi.DCH] to
-// insert or delete characters.
-func (s *TerminalRenderer) transformLine(newbuf *RenderBuffer, y int) {
-	var firstCell, oLastCell, nLastCell int // first, old last, new last index
-	oldLine := s.curbuf.Line(y)
-	newLine := newbuf.Line(y)
-
+// beginLine prepares to paint one line and reports whether the line is
+// drift-prone: it holds a cell the terminal may measure differently than the
+// model does.
+//
+// A drift-prone line is painted with autowrap off, so a terminal that measures
+// a cluster wider than the model clips it at the right margin instead of
+// wrapping. [TerminalRenderer.endLine] restores autowrap and re-anchors the
+// cursor. The two bracket every paint of a line: the guard only holds while
+// noWrapLine is set, and a caller that repaints a drift-prone line without it
+// leaves the real cursor a row down on a legacy-width terminal, which every
+// line after it inherits.
+func (s *TerminalRenderer) beginLine(newbuf *RenderBuffer, y int) (drift bool) {
 	s.lineDrifted = false
-	defer s.reanchorWideLine(newbuf)
 
-	drift := lineHasDrift(s.method, oldLine) || lineHasDrift(s.method, newLine)
+	drift = lineHasDrift(s.method, s.curbuf.Line(y)) || lineHasDrift(s.method, newbuf.Line(y))
 	s.markDrift(y, newbuf.Height(), drift)
 
 	// A drift-prone line leaves the cursor somewhere the model cannot predict,
-	// so it needs the re-anchor below. A wide cell is the obvious case, and
-	// [TerminalRenderer.putAttrCell] flags it when one is written. It is not
-	// the only case: a cluster of width 1 the terminal measures as 2, such as
-	// an emoji with a variation selector, desynchronises the column just as
+	// so it needs the re-anchor in endLine. A wide cell is the obvious case,
+	// and [TerminalRenderer.putAttrCell] flags it when one is written. It is
+	// not the only case: a cluster of width 1 the terminal measures as 2, such
+	// as an emoji with a variation selector, desynchronises the column just as
 	// thoroughly while every cell on the line stays one column wide.
 	s.lineDrifted = drift
 
@@ -991,11 +994,33 @@ func (s *TerminalRenderer) transformLine(newbuf *RenderBuffer, y int) {
 	if drift && !s.flags.Contains(tGraphemeWidth) {
 		s.noWrapLine = true
 		_, _ = s.buf.WriteString(ansi.ResetModeAutoWrap)
-		defer func() {
-			s.noWrapLine = false
-			_, _ = s.buf.WriteString(ansi.SetModeAutoWrap)
-		}()
 	}
+
+	return drift
+}
+
+// endLine restores the autowrap [TerminalRenderer.beginLine] turned off and
+// re-anchors the cursor after a line that may have left it adrift. The
+// re-anchor is a no-op unless a cell was written that the terminal may measure
+// differently.
+func (s *TerminalRenderer) endLine(newbuf *RenderBuffer) {
+	if s.noWrapLine {
+		s.noWrapLine = false
+		_, _ = s.buf.WriteString(ansi.SetModeAutoWrap)
+	}
+	s.reanchorWideLine(newbuf)
+}
+
+// transformLine transforms the given line in the current window to the
+// corresponding line in the new window. It uses [ansi.ICH] and [ansi.DCH] to
+// insert or delete characters.
+func (s *TerminalRenderer) transformLine(newbuf *RenderBuffer, y int) {
+	var firstCell, oLastCell, nLastCell int // first, old last, new last index
+	oldLine := s.curbuf.Line(y)
+	newLine := newbuf.Line(y)
+
+	drift := s.beginLine(newbuf, y)
+	defer s.endLine(newbuf)
 
 	// If either frame's line holds a cell that a cell-level diff cannot
 	// safely reposition across, repaint the whole line instead. A wide cell
@@ -1575,7 +1600,12 @@ func (s *TerminalRenderer) Render(newbuf *RenderBuffer) {
 			if size.repaintAll {
 				// The model still matches the frame, so a diff would emit
 				// nothing; the row has to be put back whatever the model says.
+				// The drift guard still applies: repainting a row the terminal
+				// may measure differently with autowrap on would wrap the
+				// excess onto the next row.
+				s.beginLine(newbuf, i)
 				s.repaintLine(newbuf, i)
+				s.endLine(newbuf)
 				changedLines++
 			} else if s.damaged[i] || (newbuf.Touched[i] != nil &&
 				(newbuf.Touched[i].FirstCell != -1 || newbuf.Touched[i].LastCell != -1)) {

@@ -1827,6 +1827,39 @@ func TestRendererNoWrapOnDriftLine(t *testing.T) {
 	}
 }
 
+// A terminal resize repaints an inline frame row by row without diffing, and
+// that repaint has to keep the drift guard too. The row is put back because the
+// terminal moved it, not because the application touched it, and a row the
+// terminal measures wider than the model would otherwise wrap the excess onto
+// the next row, dragging the real cursor below the frame with it.
+func TestRendererNoWrapOnDriftLineAfterResize(t *testing.T) {
+	var buf bytes.Buffer
+	r := NewTerminalRenderer(&buf, []string{"TERM=xterm-256color"})
+	r.SetRelativeCursor(true)
+	r.Resize(6, 12)
+
+	scr := NewScreenBuffer(6, 2)
+	NewStyledString("世界").Draw(scr, Rect(0, 0, 6, 1))
+	r.Render(scr.RenderBuffer)
+	if err := r.Flush(); err != nil {
+		t.Fatalf("failed to flush renderer: %v", err)
+	}
+
+	// The terminal resizes under the frame, so the next render repaints rows
+	// the application did not touch.
+	buf.Reset()
+	r.Resize(7, 12)
+	r.Render(scr.RenderBuffer)
+	if err := r.Flush(); err != nil {
+		t.Fatalf("failed to flush renderer: %v", err)
+	}
+
+	out := buf.String()
+	if !strings.Contains(out, ansi.ResetModeAutoWrap) || !strings.Contains(out, ansi.SetModeAutoWrap) {
+		t.Errorf("repainting a drift-prone row should keep autowrap off, got: %q", out)
+	}
+}
+
 // The repaint a height change forces belongs to fullscreen mode and to actual
 // changes. Inline frames are shorter than the terminal by design, and a render
 // that resizes nothing has nothing to distrust.
