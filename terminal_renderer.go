@@ -9,7 +9,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/charmbracelet/colorprofile"
-	"github.com/charmbracelet/x/ansi"
+	"github.com/keakon/x/ansi"
 )
 
 // ErrInvalidDimensions is returned when the dimensions of a window are invalid

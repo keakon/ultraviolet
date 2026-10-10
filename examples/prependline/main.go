@@ -5,9 +5,9 @@ import (
 	"log"
 	"math/rand"
 
-	"github.com/charmbracelet/x/ansi"
 	uv "github.com/keakon/ultraviolet"
 	"github.com/keakon/ultraviolet/screen"
+	"github.com/keakon/x/ansi"
 )
 
 func main() {

@@ -4,7 +4,7 @@ import (
 	"io"
 	"testing"
 
-	"github.com/charmbracelet/x/ansi"
+	"github.com/keakon/x/ansi"
 )
 
 // warningSign is U+26A0 followed by a VS16 emoji-presentation selector

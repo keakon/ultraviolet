@@ -1,6 +1,6 @@
 package uv
 
-import "github.com/charmbracelet/x/ansi"
+import "github.com/keakon/x/ansi"
 
 // Window represents a rectangular area on the screen. It can be a root window
 // with no parent, or a sub-window with a parent window. A window can have its

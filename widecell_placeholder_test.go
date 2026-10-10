@@ -3,7 +3,7 @@ package uv
 import (
 	"testing"
 
-	"github.com/charmbracelet/x/ansi"
+	"github.com/keakon/x/ansi"
 )
 
 // TestStyledWideCellPlaceholderDetection reproduces the placeholder-detection

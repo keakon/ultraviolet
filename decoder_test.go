@@ -4,8 +4,8 @@ import (
 	"image/color"
 	"testing"
 
-	"github.com/charmbracelet/x/ansi"
 	xwindows "github.com/charmbracelet/x/windows"
+	"github.com/keakon/x/ansi"
 	"github.com/lucasb-eyer/go-colorful"
 )
 

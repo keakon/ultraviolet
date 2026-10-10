@@ -15,9 +15,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/charmbracelet/x/ansi"
-	"github.com/charmbracelet/x/ansi/kitty"
-	"github.com/charmbracelet/x/ansi/parser"
+	"github.com/keakon/x/ansi"
+	"github.com/keakon/x/ansi/kitty"
+	"github.com/keakon/x/ansi/parser"
 	"github.com/lucasb-eyer/go-colorful"
 )
 

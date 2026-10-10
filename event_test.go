@@ -5,8 +5,8 @@ import (
 	"image/color"
 	"testing"
 
-	"github.com/charmbracelet/x/ansi"
-	"github.com/charmbracelet/x/ansi/kitty"
+	"github.com/keakon/x/ansi"
+	"github.com/keakon/x/ansi/kitty"
 )
 
 // TestUnknownEventString tests String methods for all Unknown event types

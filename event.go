@@ -7,8 +7,8 @@ import (
 	"image/color"
 	"strings"
 
-	"github.com/charmbracelet/x/ansi"
-	"github.com/charmbracelet/x/ansi/kitty"
+	"github.com/keakon/x/ansi"
+	"github.com/keakon/x/ansi/kitty"
 )
 
 // Event represents an input event that can be received from an input source.

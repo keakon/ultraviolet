@@ -1,7 +1,7 @@
 package uv
 
 import (
-	"github.com/charmbracelet/x/ansi"
+	"github.com/keakon/x/ansi"
 )
 
 // MouseMode represents the mouse tracking mode for the terminal.

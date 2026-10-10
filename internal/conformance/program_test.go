@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/charmbracelet/x/ansi"
 	"github.com/keakon/ultraviolet/internal/conformance"
+	"github.com/keakon/x/ansi"
 )
 
 // Tests for the fuzzing machinery itself.

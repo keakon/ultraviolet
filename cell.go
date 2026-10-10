@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/colorprofile"
-	"github.com/charmbracelet/x/ansi"
+	"github.com/keakon/x/ansi"
 )
 
 // EmptyCell is a cell with a single space, width of 1, and no style or link.

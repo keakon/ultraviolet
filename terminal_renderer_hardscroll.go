@@ -3,7 +3,7 @@ package uv
 import (
 	"strings"
 
-	"github.com/charmbracelet/x/ansi"
+	"github.com/keakon/x/ansi"
 )
 
 // scrollOptimize optimizes the screen to transform the old buffer into the new

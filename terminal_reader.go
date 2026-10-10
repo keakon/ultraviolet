@@ -14,7 +14,7 @@ import (
 	"unicode/utf16"
 	"unicode/utf8"
 
-	"github.com/charmbracelet/x/ansi"
+	"github.com/keakon/x/ansi"
 	"github.com/muesli/cancelreader"
 	"github.com/rivo/uniseg"
 )

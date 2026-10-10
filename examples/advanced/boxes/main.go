@@ -9,10 +9,10 @@ import (
 	"slices"
 	"sync"
 
-	"github.com/charmbracelet/x/ansi"
 	"github.com/charmbracelet/x/term"
 	uv "github.com/keakon/ultraviolet"
 	"github.com/keakon/ultraviolet/screen"
+	"github.com/keakon/x/ansi"
 )
 
 const rootID = "root"

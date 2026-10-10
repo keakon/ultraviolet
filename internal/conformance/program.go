@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/charmbracelet/x/ansi"
+	"github.com/keakon/x/ansi"
 )
 
 // The fuzzer needs to explore sequences of renderer operations, not just

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/charmbracelet/x/ansi"
 	uv "github.com/keakon/ultraviolet"
+	"github.com/keakon/x/ansi"
 )
 
 // mockScreen is a basic screen implementation for testing

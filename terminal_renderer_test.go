@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/charmbracelet/colorprofile"
-	"github.com/charmbracelet/x/ansi"
+	"github.com/keakon/x/ansi"
 )
 
 func TestSimpleRendererOutput(t *testing.T) {

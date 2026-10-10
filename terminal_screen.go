@@ -10,8 +10,8 @@ import (
 	"sync"
 
 	"github.com/charmbracelet/colorprofile"
-	"github.com/charmbracelet/x/ansi"
 	"github.com/charmbracelet/x/term"
+	"github.com/keakon/x/ansi"
 )
 
 // TerminalScreen represents a terminal screen, providing methods for managing

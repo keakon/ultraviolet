@@ -11,8 +11,8 @@ import (
 	"time"
 	"unicode/utf16"
 
-	"github.com/charmbracelet/x/ansi"
 	xwindows "github.com/charmbracelet/x/windows"
+	"github.com/keakon/x/ansi"
 	"github.com/muesli/cancelreader"
 	"golang.org/x/sys/windows"
 )

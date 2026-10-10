@@ -5,7 +5,7 @@ import (
 	"image/color"
 	"io"
 
-	"github.com/charmbracelet/x/ansi"
+	"github.com/keakon/x/ansi"
 	"github.com/lucasb-eyer/go-colorful"
 )
 

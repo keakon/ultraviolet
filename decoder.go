@@ -12,9 +12,9 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/charmbracelet/x/ansi"
-	"github.com/charmbracelet/x/ansi/parser"
 	xwindows "github.com/charmbracelet/x/windows"
+	"github.com/keakon/x/ansi"
+	"github.com/keakon/x/ansi/parser"
 	"github.com/rivo/uniseg"
 )
 

@@ -12,6 +12,10 @@ github.com/clipperhouse/displaywidth v0.11.0 h1:lBc6kY44VFw+TDx4I8opi/EtL9m20WSE
 github.com/clipperhouse/displaywidth v0.11.0/go.mod h1:bkrFNkf81G8HyVqmKGxsPufD3JhNl3dSqnGhOoSD/o0=
 github.com/clipperhouse/uax29/v2 v2.7.0 h1:+gs4oBZ2gPfVrKPthwbMzWZDaAFPGYK72F0NJv2v7Vk=
 github.com/clipperhouse/uax29/v2 v2.7.0/go.mod h1:EFJ2TJMRUaplDxHKj1qAEhCtQPW2tJSwu5BF98AuoVM=
+github.com/keakon/displaywidth v0.11.0-fork.1 h1:j+GtJQQCfI2alTHFOFD+HMnBdA0yMRoPRednaVFI/rc=
+github.com/keakon/displaywidth v0.11.0-fork.1/go.mod h1:ZP2VZM0pecj/mAcpmPoXldxITNP7jgYWWEukRofoGJg=
+github.com/keakon/x/ansi v0.11.8-fork.2 h1:3mV7nRutB745bDmaMkcjI2VWNPvtfa4vZ+zw+4QflhQ=
+github.com/keakon/x/ansi v0.11.8-fork.2/go.mod h1:RNI6zdTPzg5iLWVwQhqvF1q00jin/5K9ElWwJtTEYao=
 github.com/lucasb-eyer/go-colorful v1.4.1 h1:1EO+WB73+EH8EVbzlrG3KLAfEypQWVHIBqlTf+2hNss=
 github.com/lucasb-eyer/go-colorful v1.4.1/go.mod h1:R4dSotOR9KMtayYi1e77YzuveK+i7ruzyGqttikkLy0=
 github.com/mattn/go-runewidth v0.0.30 h1:+KUuiDA4fF0R1p5FeueHefjDm+GIM+kWfFnDjybOPgk=

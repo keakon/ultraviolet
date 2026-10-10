@@ -3,8 +3,8 @@
 <img width="400" alt="Charm Ultraviolet" src="https://github.com/user-attachments/assets/3484e4b0-3741-4e8c-bebf-9ea51f5bb49c" />
 
 <p>
-    <a href="https://pkg.go.dev/github.com/charmbracelet/ultraviolet?tab=doc"><img src="https://godoc.org/github.com/charmbracelet/ultraviolet?status.svg" alt="GoDoc"></a>
-    <a href="https://github.com/charmbracelet/ultraviolet/actions"><img src="https://github.com/charmbracelet/ultraviolet/actions/workflows/build.yml/badge.svg" alt="Build Status"></a>
+    <a href="https://pkg.go.dev/github.com/keakon/ultraviolet?tab=doc"><img src="https://godoc.org/github.com/keakon/ultraviolet?status.svg" alt="GoDoc"></a>
+    <a href="https://github.com/keakon/ultraviolet/actions"><img src="https://github.com/keakon/ultraviolet/actions/workflows/build.yml/badge.svg" alt="Build Status"></a>
 </p>
 
 Ultraviolet is a set of primitives for building terminal user interfaces in Go.
@@ -22,7 +22,7 @@ that can also be used standalone.
 ## Install
 
 ```bash
-go get github.com/charmbracelet/ultraviolet@latest
+go get github.com/keakon/ultraviolet@latest
 ```
 
 ## Quick Start
@@ -33,8 +33,8 @@ package main
 import (
 	"log"
 
-	uv "github.com/charmbracelet/ultraviolet"
-	"github.com/charmbracelet/ultraviolet/screen"
+	uv "github.com/keakon/ultraviolet"
+	"github.com/keakon/ultraviolet/screen"
 )
 
 func main() {

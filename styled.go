@@ -5,7 +5,7 @@ import (
 	"image/color"
 	"strings"
 
-	"github.com/charmbracelet/x/ansi"
+	"github.com/keakon/x/ansi"
 )
 
 // StyledString is a string that can be decomposed into a series of styled

@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/charmbracelet/x/ansi"
+	"github.com/keakon/x/ansi"
 	"golang.org/x/sync/errgroup"
 )
 
