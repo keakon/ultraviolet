@@ -18,8 +18,10 @@ require (
 require (
 	github.com/bits-and-blooms/bitset v1.25.0 // indirect
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect
+	github.com/charmbracelet/x/ansi v0.11.8 // indirect
 	github.com/charmbracelet/x/termios v0.1.1 // indirect
 	github.com/charmbracelet/x/windows v0.2.2 // indirect
+	github.com/clipperhouse/displaywidth v0.11.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/keakon/displaywidth v0.11.0-fork.1 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
